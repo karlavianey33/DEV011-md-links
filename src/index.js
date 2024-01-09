@@ -1,4 +1,4 @@
-const {converAbsolute, pathUserExist, isMd, readArchive, extractLinks} = require("./functions");
+const {converAbsolute, pathUserExist, isMd, readArchive, extractLinks,validateLinks} = require("./functions");
 
 function mdLinks (path,validate) {
   return new Promise ((resolve, reject) => {
@@ -17,13 +17,23 @@ function mdLinks (path,validate) {
   readArchive(rutaConvertida)
       .then((resData) => {
       const links = extractLinks(resData, rutaConvertida) 
+        if (validate) {
+          const linksValidate = validateLinks(links);
+          resolve(linksValidate);
+        }else{
         resolve(links);
+        }
       })
       .catch((err) => {
         reject(err);
       });
   });
 }
+
+
+
+
+
 
 module.exports = {
   mdLinks

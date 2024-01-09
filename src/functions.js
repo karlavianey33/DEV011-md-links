@@ -2,7 +2,7 @@ const path = require('path'); // importé modulo path
 const fs = require('fs');
 const marked = require('marked');
 const {JSDOM} = require('jsdom');
-
+const axios = require('axios');
 const converAbsolute = (pathUser) =>
 // console.log('cómo llega el path: ', pathUser);
   (path.isAbsolute(pathUser) ? pathUser : path.resolve(pathUser));
@@ -44,6 +44,33 @@ const isMd = (pathUser) =>
     return enlacesExtraidos; //devulve el arreglo de enlaces
   };
 
+  const validateLinks = (enlacesExtraidos) => {
+    const newArrayEnlaces = enlacesExtraidos.map((link) => {
+      return axios
+        .get(link.href)
+        .then((result) => {
+          // Si el código de estado es exitoso (200-299), asigna "ok"
+          const ok = result.status >= 200 && result.status <= 299 ? "ok" : "fail";
+          return {
+            ...link,
+            status: result.status,
+            statusText: result.statusText,
+            ok,
+          };
+        })
+        .catch((err) => {
+          return {
+            ...link,
+            status: err.status || undefined, // Si no hay un código de estado, asigna undefined
+            statusText: err.statusText || "Error al validar el enlace",
+            ok: "fail", // En caso de error, asigna "fail"
+          };
+        });
+    });
+  
+    return Promise.all(newArrayEnlaces);
+  };
+  
   
 
 module.exports = {
@@ -51,5 +78,6 @@ module.exports = {
   pathUserExist,
   isMd,
   readArchive,
-  extractLinks
+  extractLinks,
+  validateLinks
 };

@@ -1,5 +1,5 @@
 const {mdLinks} = require ('./index.js');
 
-mdLinks("docs/04-milestone.md")
+mdLinks("src/prueba.md",true)
 .then(res => console.log("esta es la respuesta", res))
 .catch(error => console.error("este es el error", error))
